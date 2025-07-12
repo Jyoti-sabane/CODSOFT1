@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Basic Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f5f5f5;
+      margin: 2;
+    }
+    .calculator {
+      background-color: #222;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px #0003;
+      width: 320px;
+    }
+    .display {
+      background-color: #000;
+      color: #0f0;
+      font-size: 2rem;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: right;
+      margin-bottom: 15px;
+      overflow-x: auto;
+      min-height: 50px;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    button {
+      padding: 20px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 10px;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      user-select: none;
+    }
+    button:hover {
+      background-color: #666;
+    }
+    button.operator {
+      background-color: #ff9500;
+      color: white;
+    }
+    button.operator:hover {
+      background-color: #ffa733;
+    }
+    button.equal {
+      grid-column: span 3;
+      background-color: #00c853;
+      font-weight: bold;
+    }
+    button.equal:hover {
+      background-color: #00e676;
+    }
+    button.clear {
+      background-color: #d32f2f;
+    }
+    button.clear:hover {
+      background-color: #ef5350;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="calculator">
+    <div id="display" class="display">0</div>
+    <div class="buttons">
+      <button class="clear" id="clear">C</button>
+      <button class="operator" data-operator="/">÷</button>
+      <button class="operator" data-operator="*">×</button>
+      <button class="operator" data-operator="-">−</button>
+	  <button class="operator" data-operator="%">%</button>
+
+
+      <button data-number="7">7</button>
+      <button data-number="8">8</button>
+      <button data-number="9">9</button>
+      <button class="operator" data-operator="+">+</button>
+
+      <button data-number="4">4</button>
+      <button data-number="5">5</button>
+      <button data-number="6">6</button>
+    
+
+      <button data-number=".">.</button>
+      <button data-number="1">1</button>
+      <button data-number="2">2</button>
+      <button data-number="3">3</button>
+	
+      <button data-number="0">0</button>
+	  <button id="equals" class="equal">=</button>
+      
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById('display');
+    const buttons = document.querySelectorAll('button');
+    
+    let currentInput = '0';
+    let operatorSet = false; // to prevent multiple operators in a row
+
+    function updateDisplay() {
+      display.textContent = currentInput;
+    }
+
+    function clearInput() {
+      currentInput = '0';
+      operatorSet = false;
+      updateDisplay();
+    }
+
+    function appendNumber(num) {
+      if (currentInput === '0' && num !== '.') {
+        currentInput = num;
+      } else {
+        // prevent multiple decimals in one number
+        if (num === '.' && currentInput.slice(-1) === '.') return;
+        currentInput += num;
+      }
+      operatorSet = false;
+      updateDisplay();
+    }
+
+    function appendOperator(op) {
+      if (operatorSet) {
+        // replace last operator with new one
+        currentInput = currentInput.slice(0, -1) + op;
+      } else {
+        currentInput += op;
+        operatorSet = true;
+      }
+      updateDisplay();
+    }
+
+    function calculateResult() {
+      try {
+        // Evaluate safely: replace × and ÷ with * and /
+        // Here, operators are stored as * and / already.
+        let result = Function('"use strict";return (' + currentInput + ')')();
+        if (result === Infinity || result === -Infinity || isNaN(result)) {
+          display.textContent = 'Error';
+        } else {
+          currentInput = result.toString();
+          operatorSet = false;
+          updateDisplay();
+        }
+      } catch {
+        display.textContent = 'Error';
+      }
+    }
+
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        if (button.id === 'clear') {
+          clearInput();
+        } else if (button.id === 'equals') {
+          calculateResult();
+        } else if (button.hasAttribute('data-number')) {
+          appendNumber(button.getAttribute('data-number'));
+        } else if (button.hasAttribute('data-operator')) {
+          appendOperator(button.getAttribute('data-operator'));
+        }
+      });
+    });
+
+    updateDisplay();
+  </script>
+</body>
+</html>
